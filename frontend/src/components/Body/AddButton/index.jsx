@@ -1,14 +1,31 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import FormInstituicao from '../FormInstituicao';
+import axios from '../../../api/axios';
 
-const AddButton = (props) => {
+const AddButton = () => {
     const [show, setShow] = useState(false);
+    const formRef = useRef(null);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    const handleSubmit = async (data) => {
+        try {
+            await axios.post('/instituicoes', data);
+            handleClose();
+        } catch {
+            alert('Erro ao salvar a instituição');
+        }
+    };
+
+    const handleSave = () => {
+        if (formRef.current) {
+            formRef.current.submit();
+        }
+    };
 
     return (
         <div className="add-button-container">
@@ -21,13 +38,13 @@ const AddButton = (props) => {
                     <Modal.Title>Nova Instituição</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <FormInstituicao />
+                    <FormInstituicao ref={formRef} onSubmit={handleSubmit} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
                         Fechar
                     </Button>
-                    <Button variant="primary" onClick={handleClose}>
+                    <Button variant="primary" onClick={handleSave}>
                         Salvar
                     </Button>
                 </Modal.Footer>

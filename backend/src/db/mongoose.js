@@ -1,11 +1,11 @@
 const mongoose = require('mongoose')
 
-const mongoURL = 'url_do_servidor_mongo'
-const mongoPort = 'porta_do_servidor_mongo'
+const mongoURL = 'dev.api.ies.labore.tech'
+const mongoPort = '17013'
 
-const username = encodeURIComponent('seu_usuario')
-const password = encodeURIComponent('sua_senha')
-const databaseName = encodeURIComponent('seu_database')
+const username = encodeURIComponent('jonas')
+const password = encodeURIComponent('j0nasMelo')
+const databaseName = encodeURIComponent('jonas')
 const authDB = databaseName
 
 const connectionURL = `mongodb://${username}:${password}@${mongoURL}:${mongoPort}/${databaseName}?authMechanism=SCRAM-SHA-1&authSource=${authDB}`
