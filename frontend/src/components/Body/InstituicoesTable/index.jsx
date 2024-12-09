@@ -6,11 +6,12 @@ import FormInstituicao from '../FormInstituicao';
 import './index.css';
 import PropTypes from 'prop-types';
 
-const InstituicoesTable = () => {
+const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     const [data, setData] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [currentInstituicao, setCurrentInstituicao] = useState(null);
-    const formRef = useRef(null);
+    const formRef = useRef(null); // Referência para submeter o formulário programaticamente
+    const [errorMessage, setErrorMessage] = useState('');
 
     const fetchData = React.useCallback(async () => {
         try {
@@ -23,37 +24,33 @@ const InstituicoesTable = () => {
 
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
+    }, [fetchData, dataChanged]);
 
-    const handleEdit = React.useCallback((instituicao) => {
-        setCurrentInstituicao(instituicao);
-        setShowModal(true);
-    }, []);
-
+    // Deleta a instituição pelo id e useCallback pelo uso da função no useMemo
     const handleDelete = React.useCallback(async (id) => {
         try {
             await axios.delete(`/instituicoes/${id}`);
             fetchData();
+            onDataChange();
         } catch (error) {
             console.error('Erro ao deletar instituição:', error);
         }
-    }, [fetchData]);
+    }, [fetchData, onDataChange]);
 
-    const handleSubmit = async (data) => {
+    // Recebe os dados do formulário e faz a requisição PUT para atualizar a instituição
+    const handleEdit = async (data) => {
         try {
             await axios.put(`/instituicoes/${currentInstituicao._id}`, data);
  
             setShowModal(false);
             fetchData();
+            onDataChange();
         } catch {
-            alert('Erro ao editar a instituição');
+            setErrorMessage('Erro ao editar a instituição.');
         }
     };
 
-    const handleSave = () => {
-        if (formRef.current) { formRef.current.submit(); }
-    };
-
+    // Define as colunas da tabela e useMemo pois não é necessário recriar as colunas a cada renderização
     const columns = React.useMemo(
         () => [
             { Header: 'Nome', accessor: 'nome' },
@@ -63,7 +60,10 @@ const InstituicoesTable = () => {
                 Header: 'Editar',
                 accessor: 'edit',
                 Cell: ({ row }) => (
-                    <Button variant="warning" onClick={() => handleEdit(row.original)}>
+                    <Button variant="warning" onClick={() => {
+                        setCurrentInstituicao(row.original);
+                        setShowModal(true);
+                    }}>
                         Editar
                     </Button>
                 ),
@@ -78,7 +78,7 @@ const InstituicoesTable = () => {
                 ),
             },
         ],
-        [handleDelete, handleEdit]
+        [handleDelete]
     );
 
     const {
@@ -93,10 +93,10 @@ const InstituicoesTable = () => {
         <div className="table-container">
             <table {...getTableProps()} style={{ width: '100%', maxHeight: '400px', overflowY: 'auto' }}>
                 <thead>
-                    {headerGroups.map(headerGroup => (
-                        <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
-                            {headerGroup.headers.map(column => (
-                                <th {...column.getHeaderProps()} key={column.id}>
+                    {headerGroups.map((headerGroup, index) => (
+                        <tr {...headerGroup.getHeaderGroupProps()} key={`headerGroup-${index}`}>
+                            {headerGroup.headers.map((column, colIndex) => (
+                                <th {...column.getHeaderProps()} key={`column-${colIndex}`}>
                                     {column.render('Header')}
                                 </th>
                             ))}
@@ -124,13 +124,14 @@ const InstituicoesTable = () => {
                     <Modal.Title>Editar Instituição</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <FormInstituicao ref={formRef} initialData={currentInstituicao} onSubmit={handleSubmit} />
+                    <FormInstituicao ref={formRef} initialData={currentInstituicao} onSubmit={handleEdit} />
                 </Modal.Body>
                 <Modal.Footer>
+                    {errorMessage && <div className="error-message">{errorMessage}</div>}
                     <Button variant="secondary" onClick={() => setShowModal(false)}>
                         Fechar
                     </Button>
-                    <Button variant="primary" onClick={handleSave}>
+                    <Button variant="primary" onClick={() => formRef.current && formRef.current.submit()}>
                         Salvar
                     </Button>
                 </Modal.Footer>
@@ -141,13 +142,26 @@ const InstituicoesTable = () => {
 
 InstituicoesTable.propTypes = {
     row: PropTypes.shape({
+        cells: PropTypes.arrayOf(
+            PropTypes.shape({
+                getCellProps: PropTypes.func.isRequired,
+                render: PropTypes.func.isRequired,
+                column: PropTypes.shape({
+                    id: PropTypes.string.isRequired,
+                }).isRequired,
+            }).isRequired
+        ).isRequired,
+        id: PropTypes.string.isRequired,
         original: PropTypes.shape({
             _id: PropTypes.string.isRequired,
             nome: PropTypes.string.isRequired,
             uf: PropTypes.string.isRequired,
             qtdAlunos: PropTypes.number.isRequired,
         }).isRequired,
+        getRowProps: PropTypes.func.isRequired,
     }),
+    onDataChange: PropTypes.func.isRequired,
+    dataChanged: PropTypes.bool.isRequired,
 };
 
 export default InstituicoesTable;

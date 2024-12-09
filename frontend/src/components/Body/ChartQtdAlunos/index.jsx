@@ -1,11 +1,12 @@
 import './index.css';
 import { useRef, useLayoutEffect } from 'react';
+import PropTypes from 'prop-types';
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import axios from '../../../api/axios';
 
-const ChartQtdAlunos = () => {
+const ChartQtdAlunos = ({ dataChanged }) => {
   const chartRef = useRef(null);
 
   // Creates the chart, this code only runs one time
@@ -124,7 +125,7 @@ const ChartQtdAlunos = () => {
     return () => {
       root.dispose();
     };
-  }, []);
+  }, [dataChanged]);
 
   // When the paddingRight prop changes it will update the chart
   useLayoutEffect(() => {
@@ -140,5 +141,10 @@ const ChartQtdAlunos = () => {
     </div>
     
   );
-}
+};
+
+ChartQtdAlunos.propTypes = {
+  dataChanged: PropTypes.bool.isRequired,
+};
+
 export default ChartQtdAlunos;

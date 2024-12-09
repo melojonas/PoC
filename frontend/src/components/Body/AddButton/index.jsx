@@ -1,29 +1,30 @@
 import { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { Button, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import FormInstituicao from '../FormInstituicao';
 import axios from '../../../api/axios';
 
-const AddButton = () => {
+const AddButton = ({ onDataChange }) => {
     const [show, setShow] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const formRef = useRef(null);
 
-    const handleClose = () => setShow(false);
+    const handleClose = () => { setShow(false); setErrorMessage(''); };
     const handleShow = () => setShow(true);
 
     const handleSubmit = async (data) => {
         try {
             await axios.post('/instituicoes', data);
             handleClose();
-        } catch {
-            alert('Erro ao salvar a instituição');
-        }
-    };
-
-    const handleSave = () => {
-        if (formRef.current) {
-            formRef.current.submit();
+            onDataChange();
+        } catch (error) {
+            if (error?.response?.data?.errorResponse?.code === 11000) {
+                setErrorMessage('Instituição já cadastrada.');
+            } else {
+                setErrorMessage('Erro ao salvar a instituição.');
+            }
         }
     };
 
@@ -41,10 +42,11 @@ const AddButton = () => {
                     <FormInstituicao ref={formRef} onSubmit={handleSubmit} />
                 </Modal.Body>
                 <Modal.Footer>
+                    {errorMessage && <div className="error-message">{errorMessage}</div>}
                     <Button variant="secondary" onClick={handleClose}>
                         Fechar
                     </Button>
-                    <Button variant="primary" onClick={handleSave}>
+                    <Button variant="primary" onClick={ () => formRef.current && formRef.current.submit() }>
                         Salvar
                     </Button>
                 </Modal.Footer>
@@ -52,5 +54,8 @@ const AddButton = () => {
         </div>
     );
 }
+AddButton.propTypes = {
+    onDataChange: PropTypes.func.isRequired,
+};
 
 export default AddButton;

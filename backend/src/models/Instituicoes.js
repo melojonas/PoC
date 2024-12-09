@@ -2,7 +2,8 @@ const mongoose = require('mongoose')
 
 const InstituicaoSchema = new mongoose.Schema({
     nome: {
-        type: String
+        type: String,
+        unique: true // Garantir a unicidade
     },
     uf: {
         type: String
@@ -12,6 +13,15 @@ const InstituicaoSchema = new mongoose.Schema({
     }
 
 })
+
+// Garantir a unicidade case-insensitive
+InstituicaoSchema.index(
+    { nome: 1 },
+    {
+        unique: true,
+        collation: { locale: 'pt', strength: 2 } // Case-insensitive
+    }
+);
 
 const Instituicao = mongoose.model('Instituicao', InstituicaoSchema, 'instituicoes')
 
