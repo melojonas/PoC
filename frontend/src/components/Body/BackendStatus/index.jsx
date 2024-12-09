@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import { Alert, Button } from 'react-bootstrap';
 import backendUrl from '../../../utils/backend-url';
 
-const BackendStatus = () => {
+const BackendStatus = ({ onDataChange }) => {
     const [status, setStatus] = useState(null);
 
     const checkBackendStatus = async () => {
@@ -34,13 +35,17 @@ const BackendStatus = () => {
             {status === 'error' && (
                 <Alert variant="danger">
                     API do Backend está inacessível,{''}
-                    <Button variant="link" onClick={checkBackendStatus}>
+                    <Button variant="link" onClick={ () => { checkBackendStatus(); onDataChange(); }}>
                         clique aqui para tentar novamente
                     </Button>.
                 </Alert>
             )}
         </div>
     );
+};
+
+BackendStatus.propTypes = {
+    onDataChange: PropTypes.func.isRequired,
 };
 
 export default BackendStatus;

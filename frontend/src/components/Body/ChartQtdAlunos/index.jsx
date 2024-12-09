@@ -77,23 +77,11 @@ const ChartQtdAlunos = ({ dataChanged }) => {
     series.columns.template.adapters.add("fill", (fill, target) => chart.get("colors").getIndex(series.columns.indexOf(target)));
     series.columns.template.adapters.add("stroke", (stroke, target) => chart.get("colors").getIndex(series.columns.indexOf(target)));
 
-    // Fetch data
-    // Mock data
-    let mockData = [
-        {   uf: "RS",
-            totalAlunos: 200},
-        {   uf: "SC",
-            totalAlunos: 100},
-        {   uf: "PR",
-            totalAlunos: 300},
-        {   uf: "SP",
-            totalAlunos: 400},
-        {   uf: "RJ",
-            totalAlunos: 500},
-        {   uf: "MG",
-            totalAlunos: 600},
-        ];
+    // Cursor
+    var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+    cursor.lineY.set("visible", false);
 
+    // Fetch data
     const fetchData = async () => {
         try {
             const response = await axios.get(`/instituicoes/aggregated`);  
@@ -105,12 +93,6 @@ const ChartQtdAlunos = ({ dataChanged }) => {
             series.data.setAll(sortedData);
         } catch (error) {
             console.error(error);
-            
-            // Ordena os dados mock pelo campo totalAlunos em ordem decrescente
-            const sortedMockData = mockData.sort((a, b) => b.totalAlunos - a.totalAlunos);
-
-            xAxis.data.setAll(sortedMockData);
-            series.data.setAll(sortedMockData);
         }
     };
 

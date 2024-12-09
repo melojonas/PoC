@@ -14,7 +14,7 @@ const Body = () => {
 
     return (
         <div className="body">
-            <BackendStatus />
+            <BackendStatus onDataChange={handleDataChange}/>
             <AddButton onDataChange={handleDataChange} />
             <InstituicoesTable onDataChange={handleDataChange} dataChanged={dataChanged} />
             <ChartQtdAlunos dataChanged={dataChanged} />
