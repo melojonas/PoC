@@ -23,6 +23,7 @@
 ### Gráfico de Quantidade de Alunos por UF
 - Exibe um gráfico de barras com a quantidade total de alunos por UF.
 - O gráfico é atualizado automaticamente sempre que uma instituição é adicionada, editada ou removida.
+- O gráfico está ordenado de forma decrescente por quantidade de alunos.
 
 ## Rotas da API
 
