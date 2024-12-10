@@ -2,11 +2,29 @@ import { useState, forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 import './index.css';
 
+/**
+ * Componente FormInstituicao
+ * 
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Function} props.onSubmit - Função chamada ao submeter o formulário
+ * @param {Object} [props.initialData] - Dados iniciais do formulário
+ * @param {string} [props.initialData.nome] - Nome da instituição
+ * @param {string} [props.initialData.uf] - Unidade Federativa da instituição
+ * @param {number|string} [props.initialData.qtdAlunos] - Quantidade de alunos da instituição
+ * @param {string} [props.initialData._id] - ID da instituição
+ * @returns {JSX.Element} - Elemento JSX do formulário de instituição
+ */
 const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
     const [nome, setNome] = useState(initialData?.nome || '');
     const [uf, setUf] = useState(initialData?.uf || '');
     const [qtdAlunos, setQtdAlunos] = useState(initialData?.qtdAlunos || '');
 
+    /**
+     * Manipula o envio do formulário
+     * 
+     * @param {Object} e - Evento de envio do formulário
+     */
     const handleSubmit = (e) => {
         e.preventDefault();
         const data = { nome, uf, qtdAlunos: parseInt(qtdAlunos) };
@@ -14,6 +32,9 @@ const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
     };
 
     useImperativeHandle(ref, () => ({
+        /**
+         * Submete o formulário programaticamente
+         */
         submit: () => {
             document.querySelector('button[type="submit"]').click();
         },

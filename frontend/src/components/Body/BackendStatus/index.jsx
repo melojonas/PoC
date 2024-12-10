@@ -4,9 +4,20 @@ import axios from 'axios';
 import { Alert, Button } from 'react-bootstrap';
 import backendUrl from '../../../utils/backend-url';
 
+/**
+ * Componente BackendStatus
+ * 
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Function} props.onDataChange - Função chamada quando os dados são alterados
+ * @returns {JSX.Element} - Elemento JSX do status do backend
+ */
 const BackendStatus = ({ onDataChange }) => {
     const [status, setStatus] = useState(null);
 
+    /**
+     * Verifica o status do backend
+     */
     const checkBackendStatus = async () => {
         try {
             const response = await axios.get(backendUrl);
