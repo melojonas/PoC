@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 /**
  * Schema para a coleção de Instituições.
  * @typedef {Object} InstituicaoSchema
- * @property {String} nome - Nome da instituição (único).
+ * @property {String} nome - Nome da instituição (único e case-insensitive).
  * @property {String} uf - Unidade Federativa da instituição.
  * @property {Number} qtdAlunos - Quantidade de alunos da instituição.
  */

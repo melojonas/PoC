@@ -46,6 +46,7 @@ const BackendStatus = ({ onDataChange }) => {
             {status === 'error' && (
                 <Alert variant="danger">
                     API do Backend está inacessível,{''}
+                    {/* onDataChange é chamado para recarregar os dados */}
                     <Button variant="link" onClick={ () => { checkBackendStatus(); onDataChange(); }}>
                         clique aqui para tentar novamente
                     </Button>.
@@ -55,6 +56,7 @@ const BackendStatus = ({ onDataChange }) => {
     );
 };
 
+// Validação de tipos das propriedades
 BackendStatus.propTypes = {
     onDataChange: PropTypes.func.isRequired,
 };

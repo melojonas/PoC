@@ -15,7 +15,7 @@ import './index.css';
  * @param {string} [props.initialData._id] - ID da instituição
  * @returns {JSX.Element} - Elemento JSX do formulário de instituição
  */
-const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
+const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => { // forwardRef é usado para permitir o uso de ref no componente
     const [nome, setNome] = useState(initialData?.nome || '');
     const [uf, setUf] = useState(initialData?.uf || '');
     const [qtdAlunos, setQtdAlunos] = useState(initialData?.qtdAlunos || '');
@@ -73,6 +73,7 @@ const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
 
     return (
         <form onSubmit={handleSubmit} className="form-instituicao">
+            {/* A validação do campo Nome é feito pelo MongoDB como campo único case-insensitive */}
             <div className="form-group">
                 <label htmlFor="nome">Nome</label>
                 <input
@@ -84,6 +85,7 @@ const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
                     required
                 />
             </div>
+            {/* Faz uso de um select para a escolha da UF, insere apenas a sigla no BD */}
             <div className="form-group">
                 <label htmlFor="uf">UF</label>
                 <div className="relative">
@@ -100,13 +102,14 @@ const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
                             </option>
                         ))}
                     </select>
+                    {/* Adiciona uma seta para indicar que é um dropdown */}
                     <span className="select-arrow"></span>
                 </div>
             </div>
             <div className="form-group">
                 <label htmlFor="qtdAlunos">Quantidade de Alunos</label>
                 <input
-                    type="number"
+                    type="number" // Força o campo a aceitar apenas números
                     className="form-control"
                     id="qtdAlunos"
                     value={qtdAlunos}
@@ -121,6 +124,7 @@ const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
 
 FormInstituicao.displayName = 'FormInstituicao';
 
+// Validação das propriedades
 FormInstituicao.propTypes = {
     onSubmit: PropTypes.func,
     initialData: PropTypes.shape({

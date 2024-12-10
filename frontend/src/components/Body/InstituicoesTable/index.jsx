@@ -91,7 +91,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
             {
                 Header: 'Qtd Alunos',
                 accessor: 'qtdAlunos',
-                Cell: ({ value }) => value.toLocaleString('pt-BR'),
+                Cell: ({ value }) => value.toLocaleString('pt-BR'), // Formata o número para o padrão brasileiro
                 sortType: 'basic',
             },
             {
@@ -119,6 +119,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         [handleDelete]
     );
 
+    // Cria a tabela com os dados e as funções de paginação e ordenação
     const {
         getTableProps,
         getTableBodyProps,
@@ -149,6 +150,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
 
     return (
         <div className="table-container">
+            {/* Tabela de instituições */}
             <table {...getTableProps()} style={{ width: '100%', maxHeight: '400px', overflowY: 'auto' }}>
                 <thead>
                     {headerGroups.map((headerGroup, index) => (
@@ -183,7 +185,10 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
                     })}
                 </tbody>
             </table>
-            <div className="pagination">
+            {data.length === 0 && <div className="empty-table">Nenhuma instituição cadastrada.</div>}
+            {/* Paginação */}
+            {data.length > 0 && (
+                <div className="pagination">
                 <div className="pagination-info">
                     <Button onClick={() => gotoPage(0)} disabled={!canPreviousPage} variant="outline-primary">
                         {'<<'}
@@ -230,7 +235,9 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
                     </select>
                 </div>
             </div>
+            )}
 
+            {/* Modal de edição de instituição */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Editar Instituição</Modal.Title>
@@ -252,6 +259,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     );
 };
 
+// Validação das propriedades
 InstituicoesTable.propTypes = {
     row: PropTypes.shape({
         cells: PropTypes.arrayOf(

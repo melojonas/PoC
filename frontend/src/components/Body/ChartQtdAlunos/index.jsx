@@ -18,7 +18,8 @@ const ChartQtdAlunos = ({ dataChanged }) => {
   const chartRef = useRef(null);
 
   /**
-   * Cria o gráfico, este código é executado apenas uma vez
+   * Cria o gráfico, este código é executado quando o componente 
+   * é montado e quando a propriedade dataChanged é alterada
    */
   useLayoutEffect(() => {
     let root = am5.Root.new("chartdiv");
@@ -137,6 +138,7 @@ const ChartQtdAlunos = ({ dataChanged }) => {
   );
 };
 
+// Validação das propriedades
 ChartQtdAlunos.propTypes = {
   dataChanged: PropTypes.bool.isRequired,
 };
