@@ -65,3 +65,7 @@ tbody tr:hover {
     display: flex;
     gap: 10px;
 }
+
+th {
+    cursor: pointer;
+}

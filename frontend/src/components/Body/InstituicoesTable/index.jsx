@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useTable, usePagination } from 'react-table';
+import { useTable, usePagination, useSortBy } from 'react-table';
 import { Button, Modal } from 'react-bootstrap';
 import axios from '../../../api/axios';
 import FormInstituicao from '../FormInstituicao';
@@ -63,12 +63,13 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     // Define as colunas da tabela e useMemo pois não é necessário recriar as colunas a cada renderização
     const columns = React.useMemo(
         () => [
-            { Header: 'Nome', accessor: 'nome' },
-            { Header: 'UF', accessor: 'uf' },
+            { Header: 'Nome', accessor: 'nome', sortType: 'basic' },
+            { Header: 'UF', accessor: 'uf', sortType: 'basic' },
             {
                 Header: 'Qtd Alunos',
                 accessor: 'qtdAlunos',
                 Cell: ({ value }) => value.toLocaleString('pt-BR'),
+                sortType: 'basic',
             },
             {
                 Header: 'Editar',
@@ -110,7 +111,16 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         setPageSize: setTablePageSize,
         state: { pageIndex: tablePageIndex, pageSize: tablePageSize },
     } = useTable(
-        { columns, data, initialState: { pageIndex, pageSize }},
+        { 
+            columns, 
+            data, 
+            initialState: { 
+                pageIndex, 
+                pageSize,
+                sortBy: [{ id: 'qtdAlunos', desc: true }]
+            }
+        },
+        useSortBy,
         usePagination
     );
 
@@ -121,8 +131,15 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
                     {headerGroups.map((headerGroup, index) => (
                         <tr {...headerGroup.getHeaderGroupProps()} key={`headerGroup-${index}`}>
                             {headerGroup.headers.map((column, colIndex) => (
-                                <th {...column.getHeaderProps()} key={`column-${colIndex}`}>
+                                <th {...column.getHeaderProps(column.getSortByToggleProps())} key={`column-${colIndex}`}>
                                     {column.render('Header')}
+                                    <span>
+                                        {column.isSorted
+                                            ? column.isSortedDesc
+                                                ? ' ▼'
+                                                : ' ▲'
+                                            : ''}
+                                    </span>
                                 </th>
                             ))}
                         </tr>
