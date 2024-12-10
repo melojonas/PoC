@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useTable } from 'react-table';
+import { useTable, usePagination } from 'react-table';
 import { Button, Modal } from 'react-bootstrap';
 import axios from '../../../api/axios';
 import FormInstituicao from '../FormInstituicao';
@@ -10,17 +10,26 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     const [data, setData] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [currentInstituicao, setCurrentInstituicao] = useState(null);
-    const formRef = useRef(null); // Referência para submeter o formulário programaticamente
     const [errorMessage, setErrorMessage] = useState('');
-
+    // eslint-disable-next-line no-unused-vars
+    const [pageIndex, setPageIndex] = useState(0);
+    // eslint-disable-next-line no-unused-vars
+    const [pageSize, setPageSize] = useState(15);
+    const formRef = useRef(null); // Referência para submeter o formulário programaticamente
+    
     const fetchData = React.useCallback(async () => {
         try {
-            const response = await axios.get('/instituicoes');
+            const response = await axios.get('/instituicoes', {
+                params: {
+                    page: pageIndex,
+                    limit: pageSize,
+                },
+            });
             setData(response.data);
         } catch (error) {
             console.error('Erro ao buscar instituições:', error);
         }
-    }, []);
+    }, [pageIndex, pageSize]);
 
     useEffect(() => {
         fetchData();
@@ -28,13 +37,14 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
 
     // Deleta a instituição pelo id e useCallback pelo uso da função no useMemo
     const handleDelete = React.useCallback(async (id) => {
-        try {
-            await axios.delete(`/instituicoes/${id}`);
-            fetchData();
-            onDataChange();
-        } catch (error) {
-            console.error('Erro ao deletar instituição:', error);
-        }
+        if (window.confirm('Deseja realmente excluir esta instituição?'))
+            try {
+                await axios.delete(`/instituicoes/${id}`);
+                fetchData();
+                onDataChange();
+            } catch (error) {
+                console.error('Erro ao deletar instituição:', error);
+            }
     }, [fetchData, onDataChange]);
 
     // Recebe os dados do formulário e faz a requisição PUT para atualizar a instituição
@@ -55,7 +65,11 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         () => [
             { Header: 'Nome', accessor: 'nome' },
             { Header: 'UF', accessor: 'uf' },
-            { Header: 'Qtd Alunos', accessor: 'qtdAlunos' },
+            {
+                Header: 'Qtd Alunos',
+                accessor: 'qtdAlunos',
+                Cell: ({ value }) => value.toLocaleString('pt-BR'),
+            },
             {
                 Header: 'Editar',
                 accessor: 'edit',
@@ -85,9 +99,20 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         getTableProps,
         getTableBodyProps,
         headerGroups,
-        rows,
+        page,
         prepareRow,
-    } = useTable({ columns, data });
+        canPreviousPage,
+        canNextPage,
+        pageOptions,
+        gotoPage,
+        nextPage,
+        previousPage,
+        setPageSize: setTablePageSize,
+        state: { pageIndex: tablePageIndex, pageSize: tablePageSize },
+    } = useTable(
+        { columns, data, initialState: { pageIndex, pageSize }},
+        usePagination
+    );
 
     return (
         <div className="table-container">
@@ -104,7 +129,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
                     ))}
                 </thead>
                 <tbody {...getTableBodyProps()}>
-                    {rows.map(row => {
+                    {page.map(row => {
                         prepareRow(row);
                         return (
                             <tr {...row.getRowProps()} key={row.id}>
@@ -118,6 +143,53 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
                     })}
                 </tbody>
             </table>
+            <div className="pagination">
+                <div className="pagination-info">
+                    <Button onClick={() => gotoPage(0)} disabled={!canPreviousPage} variant="outline-primary">
+                        {'<<'}
+                    </Button>
+                    <Button onClick={() => previousPage()} disabled={!canPreviousPage} variant="outline-primary">
+                        {'<'}
+                    </Button>
+                    <span className="pagination-info">
+                        Página{' '}
+                        <strong>
+                            {tablePageIndex + 1} de {pageOptions.length}
+                        </strong>
+                    </span>
+                    <Button onClick={() => nextPage()} disabled={!canNextPage} variant="outline-primary">
+                        {'>'}
+                    </Button>
+                    <Button onClick={() => gotoPage(pageOptions.length - 1)} disabled={!canNextPage} variant="outline-primary">
+                        {'>>'}
+                    </Button>
+                </div>
+                <div className="pagination-selection">
+                    <span className="pagination-go-to">
+                        Ir para página:{' '}
+                        <input
+                            type="number"
+                            defaultValue={tablePageIndex + 1}
+                            onChange={e => {
+                                const page = e.target.value ? Number(e.target.value) - 1 : 0;
+                                gotoPage(page);
+                            }}
+                        />
+                    </span>
+                    <select
+                        value={tablePageSize}
+                        onChange={e => {
+                            setTablePageSize(Number(e.target.value));
+                        }}
+                    >
+                        {[15, 30, data.length].map(tablePageSize => (
+                            <option key={tablePageSize} value={tablePageSize}>
+                                {tablePageSize === data.length ? 'Todos' : tablePageSize}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
