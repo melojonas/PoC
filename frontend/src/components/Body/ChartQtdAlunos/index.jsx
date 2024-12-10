@@ -6,10 +6,20 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import axios from '../../../api/axios';
 
+/**
+ * Componente ChartQtdAlunos
+ * 
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {boolean} props.dataChanged - Indica se os dados foram alterados
+ * @returns {JSX.Element} - Elemento JSX do gráfico de quantidade de alunos
+ */
 const ChartQtdAlunos = ({ dataChanged }) => {
   const chartRef = useRef(null);
 
-  // Creates the chart, this code only runs one time
+  /**
+   * Cria o gráfico, este código é executado apenas uma vez
+   */
   useLayoutEffect(() => {
     let root = am5.Root.new("chartdiv");
 
@@ -81,7 +91,9 @@ const ChartQtdAlunos = ({ dataChanged }) => {
     var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
     cursor.lineY.set("visible", false);
 
-    // Fetch data
+    /**
+     * Busca os dados agregados para o gráfico
+     */
     const fetchData = async () => {
         try {
             const response = await axios.get(`/instituicoes/aggregated`);  

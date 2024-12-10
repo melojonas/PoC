@@ -6,14 +6,37 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import FormInstituicao from '../FormInstituicao';
 import axios from '../../../api/axios';
 
+/**
+ * Componente AddButton
+ * 
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Function} props.onDataChange - Função chamada quando os dados são alterados
+ * @returns {JSX.Element} - Elemento JSX do botão de adicionar
+ */
 const AddButton = ({ onDataChange }) => {
     const [show, setShow] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const formRef = useRef(null);
 
+    /**
+     * Fecha o modal e limpa a mensagem de erro
+     */
     const handleClose = () => { setShow(false); setErrorMessage(''); };
+
+    /**
+     * Abre o modal
+     */
     const handleShow = () => setShow(true);
 
+    /**
+     * Submete os dados do formulário para criar uma nova instituição
+     * 
+     * @param {Object} data - Dados da instituição
+     * @param {string} data.nome - Nome da instituição
+     * @param {string} data.uf - Unidade Federativa da instituição
+     * @param {number} data.qtdAlunos - Quantidade de alunos da instituição
+     */
     const handleSubmit = async (data) => {
         try {
             await axios.post('/instituicoes', data);
@@ -54,6 +77,7 @@ const AddButton = ({ onDataChange }) => {
         </div>
     );
 }
+
 AddButton.propTypes = {
     onDataChange: PropTypes.func.isRequired,
 };

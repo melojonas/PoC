@@ -6,6 +6,15 @@ import FormInstituicao from '../FormInstituicao';
 import './index.css';
 import PropTypes from 'prop-types';
 
+/**
+ * Componente InstituicoesTable
+ * 
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Function} props.onDataChange - Função chamada quando os dados são alterados
+ * @param {boolean} props.dataChanged - Indica se os dados foram alterados
+ * @returns {JSX.Element} - Elemento JSX da tabela de instituições
+ */
 const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     const [data, setData] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -17,6 +26,9 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     const [pageSize, setPageSize] = useState(15);
     const formRef = useRef(null); // Referência para submeter o formulário programaticamente
     
+    /**
+     * Busca os dados das instituições
+     */
     const fetchData = React.useCallback(async () => {
         try {
             const response = await axios.get('/instituicoes', {
@@ -35,7 +47,11 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         fetchData();
     }, [fetchData, dataChanged]);
 
-    // Deleta a instituição pelo id e useCallback pelo uso da função no useMemo
+    /**
+     * Deleta a instituição pelo id
+     * 
+     * @param {string} id - ID da instituição
+     */
     const handleDelete = React.useCallback(async (id) => {
         if (window.confirm('Deseja realmente excluir esta instituição?'))
             try {
@@ -47,7 +63,14 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
             }
     }, [fetchData, onDataChange]);
 
-    // Recebe os dados do formulário e faz a requisição PUT para atualizar a instituição
+    /**
+     * Recebe os dados do formulário e faz a requisição PUT para atualizar a instituição
+     * 
+     * @param {Object} data - Dados da instituição
+     * @param {string} data.nome - Nome da instituição
+     * @param {string} data.uf - Unidade Federativa da instituição
+     * @param {number} data.qtdAlunos - Quantidade de alunos da instituição
+     */
     const handleEdit = async (data) => {
         try {
             await axios.put(`/instituicoes/${currentInstituicao._id}`, data);

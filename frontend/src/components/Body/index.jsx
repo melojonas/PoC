@@ -5,9 +5,18 @@ import ChartQtdAlunos from './ChartQtdAlunos';
 import InstituicoesTable from './InstituicoesTable';
 import './index.css'
 
+/**
+ * Componente Body
+ * 
+ * @component
+ * @returns {JSX.Element} - Elemento JSX do corpo da aplicação
+ */
 const Body = () => {
     const [dataChanged, setDataChanged] = useState(false);
 
+    /**
+     * Manipula a mudança de dados
+     */
     const handleDataChange = () => {
         setDataChanged(!dataChanged);
     };
