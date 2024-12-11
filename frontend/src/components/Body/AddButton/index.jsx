@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Modal } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import ReusableModal from '../ReusableModal';
 import FormInstituicao from '../FormInstituicao';
 import axios from '../../../api/axios';
 
@@ -34,26 +35,20 @@ const AddButton = ({ onDataChange }) => {
                 <FontAwesomeIcon icon={faPlus} /> Nova Instituição
             </Button>
 
-            <Modal show={show} onHide={handleClose}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Nova Instituição</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <FormInstituicao ref={formRef} onSubmit={handleSubmit} />
-                </Modal.Body>
-                <Modal.Footer>
-                    {errorMessage && <div className="error-message">{errorMessage}</div>}
-                    <Button variant="secondary" onClick={handleClose}>
-                        Fechar
-                    </Button>
-                    <Button variant="primary" onClick={ () => formRef.current && formRef.current.submit() }>
-                        Salvar
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <ReusableModal
+                show={show}
+                handleClose={handleClose}
+                title="Nova Instituição"
+                errorMessage={errorMessage}
+                formRef={formRef}
+                handleSubmit={handleSubmit}
+            >
+                <FormInstituicao ref={formRef} onSubmit={handleSubmit} />
+            </ReusableModal>
         </div>
     );
 }
+
 AddButton.propTypes = {
     onDataChange: PropTypes.func.isRequired,
 };

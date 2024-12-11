@@ -1,18 +1,10 @@
-import { useState, forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import './index.css';
 
 const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
-    const [nome, setNome] = useState(initialData?.nome || '');
-    const [uf, setUf] = useState(initialData?.uf || '');
-    const [qtdAlunos, setQtdAlunos] = useState(initialData?.qtdAlunos || '');
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const data = { nome, uf, qtdAlunos: parseInt(qtdAlunos) };
-        if (onSubmit) { onSubmit(data); }
-    };
-
     useImperativeHandle(ref, () => ({
         submit: () => {
             document.querySelector('button[type="submit"]').click();
@@ -50,51 +42,54 @@ const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
         { value: 'TO', label: 'Tocantins' },
     ];
 
+    const validationSchema = Yup.object({
+        nome: Yup.string().required('Nome é obrigatório'),
+        uf: Yup.string().required('UF é obrigatório'),
+        qtdAlunos: Yup.number().required('Quantidade de Alunos é obrigatória').integer('Quantidade de Alunos deve ser um número inteiro'),
+    });
+
     return (
-        <form onSubmit={handleSubmit} className="form-instituicao">
-            <div className="form-group">
-                <label htmlFor="nome">Nome</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="nome"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    required
-                />
-            </div>
-            <div className="form-group">
-                <label htmlFor="uf">UF</label>
-                <div className="relative">
-                    <select
-                        className="form-control"
-                        id="uf"
-                        value={uf}
-                        onChange={(e) => setUf(e.target.value)}
-                        required
-                    >
-                        {estados.map((estado) => (
-                            <option key={estado.value} value={estado.value}>
-                                {estado.label}
-                            </option>
-                        ))}
-                    </select>
-                    <span className="select-arrow"></span>
-                </div>
-            </div>
-            <div className="form-group">
-                <label htmlFor="qtdAlunos">Quantidade de Alunos</label>
-                <input
-                    type="number"
-                    className="form-control"
-                    id="qtdAlunos"
-                    value={qtdAlunos}
-                    onChange={(e) => setQtdAlunos(e.target.value)}
-                    required
-                />
-            </div>
-            <button type="submit" className="hidden-submit">Salvar</button>
-        </form>
+        <Formik
+            initialValues={{
+                nome: initialData?.nome || '',
+                uf: initialData?.uf || '',
+                qtdAlunos: initialData?.qtdAlunos || '',
+            }}
+            validationSchema={validationSchema}
+            onSubmit={(values) => {
+                onSubmit(values);
+            }}
+        >
+            {({ isSubmitting }) => (
+                <Form className="form-instituicao">
+                    <div className="form-group">
+                        <label htmlFor="nome">Nome</label>
+                        <Field type="text" name="nome" className="form-control" />
+                        <ErrorMessage name="nome" component="div" className="error-message" />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="uf">UF</label>
+                        <div className="relative">
+                            <Field as="select" name="uf" className="form-control">
+                                {estados.map((estado) => (
+                                    <option key={estado.value} value={estado.value}>
+                                        {estado.label}
+                                    </option>
+                                ))}
+                            </Field>
+                            <span className="select-arrow"></span>
+                        </div>
+                        <ErrorMessage name="uf" component="div" className="error-message" />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="qtdAlunos">Quantidade de Alunos</label>
+                        <Field type="number" name="qtdAlunos" className="form-control" />
+                        <ErrorMessage name="qtdAlunos" component="div" className="error-message" />
+                    </div>
+                    <button type="submit" className="hidden-submit" disabled={isSubmitting}>Salvar</button>
+                </Form>
+            )}
+        </Formik>
     );
 });
 

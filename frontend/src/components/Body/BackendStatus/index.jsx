@@ -1,29 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useBackendStatus } from '../../../hooks/useBackendStatus';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import { Alert, Button } from 'react-bootstrap';
-import backendUrl from '../../../utils/backend-url';
 
 const BackendStatus = ({ onDataChange }) => {
-    const [status, setStatus] = useState(null);
-
-    const checkBackendStatus = async () => {
-        try {
-            const response = await axios.get(backendUrl);
-            if (response.status === 200) {
-                setStatus('success');
-            } else {
-                setStatus('error');
-            }
-        } catch (error) {
-            console.error(error);
-            setStatus('error');
-        }
-    };
-
-    useEffect(() => {
-        checkBackendStatus();
-    }, []);
+    const { status, checkBackendStatus } = useBackendStatus();
 
     return (
         <div>

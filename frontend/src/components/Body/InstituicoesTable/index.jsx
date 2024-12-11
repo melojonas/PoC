@@ -5,6 +5,8 @@ import axios from '../../../api/axios';
 import FormInstituicao from '../FormInstituicao';
 import './index.css';
 import PropTypes from 'prop-types';
+import TableActions from './TableActions';
+import ModalState from './ModalState';
 
 const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     const [data, setData] = useState([]);
