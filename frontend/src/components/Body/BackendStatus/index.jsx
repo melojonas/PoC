@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Alert, Button } from 'react-bootstrap';
 
 const BackendStatus = ({ onDataChange }) => {
-    const { status, checkBackendStatus } = useBackendStatus();
+    const { status, checkBackendStatus } = useBackendStatus(); // Custom hook para verificar o status do backend
 
     return (
         <div>

@@ -1,19 +1,27 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTable } from 'react-table';
-import { Button, Modal } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import axios from '../../../api/axios';
 import FormInstituicao from '../FormInstituicao';
 import './index.css';
 import PropTypes from 'prop-types';
-import TableActions from './TableActions';
-import ModalState from './ModalState';
+import ReusableModal from '../ReusableModal';
 
+/**
+ * Componente InstituicoesTable
+ * 
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Function} props.onDataChange - Função chamada quando os dados são alterados
+ * @param {boolean} props.dataChanged - Indica se os dados foram alterados
+ * @returns {JSX.Element} - Elemento JSX da tabela de instituições
+ */
 const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     const [data, setData] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [currentInstituicao, setCurrentInstituicao] = useState(null);
-    const formRef = useRef(null); // Referência para submeter o formulário programaticamente
     const [errorMessage, setErrorMessage] = useState('');
+    const formRef = useRef(null); // Referência para submeter o formulário programaticamente
 
     const fetchData = React.useCallback(async () => {
         try {
@@ -121,27 +129,22 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
                 </tbody>
             </table>
 
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Editar Instituição</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <FormInstituicao ref={formRef} initialData={currentInstituicao} onSubmit={handleEdit} />
-                </Modal.Body>
-                <Modal.Footer>
-                    {errorMessage && <div className="error-message">{errorMessage}</div>}
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Fechar
-                    </Button>
-                    <Button variant="primary" onClick={() => formRef.current && formRef.current.submit()}>
-                        Salvar
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            {/* Modal para editar instituição */}
+            <ReusableModal
+                show={showModal}
+                handleClose={() => setShowModal(false)}
+                title="Editar Instituição"
+                errorMessage={errorMessage}
+                formRef={formRef}
+                handleSubmit={handleEdit}
+            >
+                <FormInstituicao ref={formRef} initialData={currentInstituicao} />
+            </ReusableModal>
         </div>
     );
 };
 
+// Definição das propTypes do componente
 InstituicoesTable.propTypes = {
     row: PropTypes.shape({
         cells: PropTypes.arrayOf(

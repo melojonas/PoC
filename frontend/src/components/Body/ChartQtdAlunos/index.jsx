@@ -3,11 +3,26 @@ import { useRef, useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { createChart } from './chartConfig';
 
+/**
+ * Componente que renderiza um gráfico de quantidade de alunos.
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente.
+ * @param {boolean} props.dataChanged - Indica se os dados do gráfico foram alterados.
+ * @returns {JSX.Element} Elemento JSX que representa o gráfico de quantidade de alunos.
+ *
+ * @example
+ * <ChartQtdAlunos dataChanged={true} />
+ */
 const ChartQtdAlunos = ({ dataChanged }) => {
   const chartRef = useRef(null);
 
+  /**
+   * Cria o gráfico quando o componente é montado
+   * e quando a propriedade dataChanged é alterada
+   */
   useLayoutEffect(() => {
-    const { root, chart } = createChart(chartRef);
+    const { root } = createChart(chartRef);
 
     return () => {
       root.dispose();
@@ -24,6 +39,7 @@ const ChartQtdAlunos = ({ dataChanged }) => {
   );
 };
 
+// Validação de tipos de props
 ChartQtdAlunos.propTypes = {
   dataChanged: PropTypes.bool.isRequired,
 };
