@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useTable, usePagination, useSortBy } from 'react-table';
-import { Button, Modal } from 'react-bootstrap';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { useTable, usePagination, useSortBy, useGlobalFilter } from 'react-table';
+import { Button } from 'react-bootstrap';
 import axios from '../../../api/axios';
 import FormInstituicao from '../FormInstituicao';
 import './index.css';
 import PropTypes from 'prop-types';
+import ReusableModal from '../ReusableModal';
 
 /**
  * Componente InstituicoesTable
@@ -20,23 +21,18 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     const [showModal, setShowModal] = useState(false);
     const [currentInstituicao, setCurrentInstituicao] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
+    const formRef = useRef(null); // Referência para submeter o formulário programaticamente
+
+    // Estados para ordenação, paginação e filtragem
     // eslint-disable-next-line no-unused-vars
     const [pageIndex, setPageIndex] = useState(0);
     // eslint-disable-next-line no-unused-vars
     const [pageSize, setPageSize] = useState(15);
-    const formRef = useRef(null); // Referência para submeter o formulário programaticamente
-    
-    /**
-     * Busca os dados das instituições
-     */
-    const fetchData = React.useCallback(async () => {
+    const [globalFilter, setGlobalFilter] = useState('');
+
+    const fetchData = useCallback(async () => {
         try {
-            const response = await axios.get('/instituicoes', {
-                params: {
-                    page: pageIndex,
-                    limit: pageSize,
-                },
-            });
+            const response = await axios.get('/instituicoes'); // TODO: Adicionar paginação, ordenação e filtros
             setData(response.data);
         } catch (error) {
             console.error('Erro ao buscar instituições:', error);
@@ -47,20 +43,15 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         fetchData();
     }, [fetchData, dataChanged]);
 
-    /**
-     * Deleta a instituição pelo id
-     * 
-     * @param {string} id - ID da instituição
-     */
-    const handleDelete = React.useCallback(async (id) => {
-        if (window.confirm('Deseja realmente excluir esta instituição?'))
-            try {
-                await axios.delete(`/instituicoes/${id}`);
-                fetchData();
-                onDataChange();
-            } catch (error) {
-                console.error('Erro ao deletar instituição:', error);
-            }
+    // Deleta a instituição pelo id e useCallback pelo uso da função no useMemo
+    const handleDelete = useCallback(async (id) => {
+        try {
+            await axios.delete(`/instituicoes/${id}`);
+            fetchData();
+            onDataChange();
+        } catch (error) {
+            console.error('Erro ao deletar instituição:', error);
+        }
     }, [fetchData, onDataChange]);
 
     /**
@@ -84,7 +75,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     };
 
     // Define as colunas da tabela e useMemo pois não é necessário recriar as colunas a cada renderização
-    const columns = React.useMemo(
+    const columns = useMemo(
         () => [
             { Header: 'Nome', accessor: 'nome', sortType: 'basic' },
             { Header: 'UF', accessor: 'uf', sortType: 'basic' },
@@ -133,23 +124,36 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         nextPage,
         previousPage,
         setPageSize: setTablePageSize,
-        state: { pageIndex: tablePageIndex, pageSize: tablePageSize },
-    } = useTable(
-        { 
-            columns, 
-            data, 
-            initialState: { 
-                pageIndex, 
-                pageSize,
-                sortBy: [{ id: 'qtdAlunos', desc: true }]
-            }
-        },
-        useSortBy,
-        usePagination
-    );
+        state: { pageIndex: tablePageIndex, pageSize: tablePageSize, globalFilter: tableGlobalFilter },
+        setGlobalFilter: setTableGlobalFilter,
+        } = useTable(
+            { 
+                columns, 
+                data, 
+                initialState: { 
+                    pageIndex, 
+                    pageSize,
+                    sortBy: [{ id: 'qtdAlunos', desc: true }],
+                    globalFilter
+                }
+            },
+            useGlobalFilter,
+            useSortBy,
+            usePagination
+        );
 
     return (
         <div className="table-container">
+            {/* Campo de filtro global */}
+            <input
+                className="global-filter-input"
+                value={tableGlobalFilter || ''}
+                onChange={e => {
+                    setGlobalFilter(e.target.value);
+                    setTableGlobalFilter(e.target.value);
+                }}
+                placeholder="Filtrar por instituições ou estado"
+            />
             {/* Tabela de instituições */}
             <table {...getTableProps()} style={{ width: '100%', maxHeight: '400px', overflowY: 'auto' }}>
                 <thead>
@@ -237,24 +241,17 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
             </div>
             )}
 
-            {/* Modal de edição de instituição */}
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Editar Instituição</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <FormInstituicao ref={formRef} initialData={currentInstituicao} onSubmit={handleEdit} />
-                </Modal.Body>
-                <Modal.Footer>
-                    {errorMessage && <div className="error-message">{errorMessage}</div>}
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Fechar
-                    </Button>
-                    <Button variant="primary" onClick={() => formRef.current && formRef.current.submit()}>
-                        Salvar
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            {/* Modal para editar instituição */}
+            <ReusableModal
+                show={showModal}
+                handleClose={() => setShowModal(false)}
+                title="Editar Instituição"
+                errorMessage={errorMessage}
+                formRef={formRef}
+                handleSubmit={handleEdit}
+            >
+                <FormInstituicao ref={formRef} initialData={currentInstituicao} />
+            </ReusableModal>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useDataChange } from '../../hooks/useDataChange';
 import AddButton from './AddButton';
 import BackendStatus from './BackendStatus';
 import ChartQtdAlunos from './ChartQtdAlunos';
@@ -12,14 +12,7 @@ import './index.css'
  * @returns {JSX.Element} - Elemento JSX do corpo da aplicação
  */
 const Body = () => {
-    const [dataChanged, setDataChanged] = useState(false);
-
-    /**
-     * Manipula a mudança de dados
-     */
-    const handleDataChange = () => {
-        setDataChanged(!dataChanged);
-    };
+    const { dataChanged, handleDataChange } = useDataChange();
 
     return (
         <div className="body">

@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useBackendStatus } from '../../../hooks/useBackendStatus';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 import { Alert, Button } from 'react-bootstrap';
-import backendUrl from '../../../utils/backend-url';
 
 /**
  * Componente BackendStatus
@@ -13,28 +11,7 @@ import backendUrl from '../../../utils/backend-url';
  * @returns {JSX.Element} - Elemento JSX do status do backend
  */
 const BackendStatus = ({ onDataChange }) => {
-    const [status, setStatus] = useState(null);
-
-    /**
-     * Verifica o status do backend
-     */
-    const checkBackendStatus = async () => {
-        try {
-            const response = await axios.get(backendUrl);
-            if (response.status === 200) {
-                setStatus('success');
-            } else {
-                setStatus('error');
-            }
-        } catch (error) {
-            console.error(error);
-            setStatus('error');
-        }
-    };
-
-    useEffect(() => {
-        checkBackendStatus();
-    }, []);
+    const { status, checkBackendStatus } = useBackendStatus(); // Custom hook para verificar o status do backend
 
     return (
         <div>

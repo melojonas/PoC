@@ -10,6 +10,8 @@ const Instituicoes = require('../models/Instituicoes')
  * @apiSuccess {Object[]} instituicoes Lista de instituições
  */
 router.get('/', async (req, res) => {
+
+    // TODO: Implementar paginação, ordenação e filtros
     const list = await Instituicoes.find({})
     res.status(200).send(list)
 })

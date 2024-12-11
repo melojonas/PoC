@@ -1,36 +1,34 @@
-import { useState, forwardRef, useImperativeHandle } from 'react';
+// Importações de bibliotecas e estilos
+import { forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import './index.css';
 
 /**
- * Componente FormInstituicao
- * 
+ * Este componente renderiza um formulário para dados de instituição usando o Formik para gerenciamento de formulários e o Yup para validação.
+ * Ele permite que os usuários insiram o nome da instituição, o estado (UF) e o número de estudantes.
+ * O formulário pode ser enviado programaticamente usando o método submit exposto por meio de uma referência (ref).
+ *
  * @component
- * @param {Object} props - Propriedades do componente
- * @param {Function} props.onSubmit - Função chamada ao submeter o formulário
- * @param {Object} [props.initialData] - Dados iniciais do formulário
- * @param {string} [props.initialData.nome] - Nome da instituição
- * @param {string} [props.initialData.uf] - Unidade Federativa da instituição
- * @param {number|string} [props.initialData.qtdAlunos] - Quantidade de alunos da instituição
- * @param {string} [props.initialData._id] - ID da instituição
- * @returns {JSX.Element} - Elemento JSX do formulário de instituição
+ * @param {Object} props - Propriedades do componente.
+ * @param {Function} props.onSubmit - Função chamada ao submeter o formulário.
+ * @param {Object} [props.initialData] - Dados iniciais para preencher o formulário.
+ * @param {string} [props.initialData.nome] - Nome inicial da instituição.
+ * @param {string} [props.initialData.uf] - UF inicial da instituição.
+ * @param {number} [props.initialData.qtdAlunos] - Quantidade inicial de alunos.
+ * @param {React.Ref} ref - Referência para o componente, usada para expor a função submit.
+ *
+ * @returns {JSX.Element} O componente de formulário.
+ * 
+ * @example
+ * const ref = useRef();
+ * const handleSubmit = (values) => { console.log(values); };
+ * const initialData = { nome: 'Instituição X', uf: 'SP', qtdAlunos: 100 };
+ * return <FormInstituicao ref={ref} onSubmit={handleSubmit} initialData={initialData} />;
  */
-const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => { // forwardRef é usado para permitir o uso de ref no componente
-    const [nome, setNome] = useState(initialData?.nome || '');
-    const [uf, setUf] = useState(initialData?.uf || '');
-    const [qtdAlunos, setQtdAlunos] = useState(initialData?.qtdAlunos || '');
-
-    /**
-     * Manipula o envio do formulário
-     * 
-     * @param {Object} e - Evento de envio do formulário
-     */
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const data = { nome, uf, qtdAlunos: parseInt(qtdAlunos) };
-        if (onSubmit) { onSubmit(data); }
-    };
-
+const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
+    // Uso do hook useImperativeHandle para expor a função submit
     useImperativeHandle(ref, () => ({
         /**
          * Submete o formulário programaticamente
@@ -40,6 +38,7 @@ const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => { // forw
         },
     }));
 
+    // Lista de estados brasileiros
     const estados = [
         { value: '', label: 'Selecione um estado' },
         { value: 'AC', label: 'Acre' },
@@ -71,60 +70,66 @@ const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => { // forw
         { value: 'TO', label: 'Tocantins' },
     ];
 
+    // Esquema de validação do formulário usando Yup
+    const validationSchema = Yup.object({
+        nome: Yup.string().required('Nome é obrigatório'),
+        uf: Yup.string().required('UF é obrigatório'),
+        qtdAlunos: Yup.number().required('Quantidade de Alunos é obrigatória').integer('Quantidade de Alunos deve ser um número inteiro'),
+    });
+
+    // Renderização do formulário usando Formik
     return (
-        <form onSubmit={handleSubmit} className="form-instituicao">
-            {/* A validação do campo Nome é feito pelo MongoDB como campo único case-insensitive */}
-            <div className="form-group">
-                <label htmlFor="nome">Nome</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="nome"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    required
-                />
-            </div>
-            {/* Faz uso de um select para a escolha da UF, insere apenas a sigla no BD */}
-            <div className="form-group">
-                <label htmlFor="uf">UF</label>
-                <div className="relative">
-                    <select
-                        className="form-control"
-                        id="uf"
-                        value={uf}
-                        onChange={(e) => setUf(e.target.value)}
-                        required
-                    >
-                        {estados.map((estado) => (
-                            <option key={estado.value} value={estado.value}>
-                                {estado.label}
-                            </option>
-                        ))}
-                    </select>
-                    {/* Adiciona uma seta para indicar que é um dropdown */}
-                    <span className="select-arrow"></span>
-                </div>
-            </div>
-            <div className="form-group">
-                <label htmlFor="qtdAlunos">Quantidade de Alunos</label>
-                <input
-                    type="number" // Força o campo a aceitar apenas números
-                    className="form-control"
-                    id="qtdAlunos"
-                    value={qtdAlunos}
-                    onChange={(e) => setQtdAlunos(e.target.value)}
-                    required
-                />
-            </div>
-            <button type="submit" className="hidden-submit">Salvar</button>
-        </form>
+        <Formik
+            initialValues={{
+                nome: initialData?.nome || '',
+                uf: initialData?.uf || '',
+                qtdAlunos: initialData?.qtdAlunos || '',
+            }}
+            validationSchema={validationSchema}
+            onSubmit={(values) => {
+                onSubmit(values);
+            }}
+        >
+            {({ isSubmitting }) => (
+                <Form className="form-instituicao">
+                    {/* A validação do campo Nome também é feito pelo MongoDB como campo único case-insensitive */}
+                    <div className="form-group">
+                        <label htmlFor="nome">Nome</label>
+                        <Field type="text" name="nome" className="form-control" />
+                        <ErrorMessage name="nome" component="div" className="error-message" />
+                    </div>
+                    {/* Faz uso de um select para a escolha da UF, insere apenas a sigla no BD */}
+                    <div className="form-group">
+                        <label htmlFor="uf">UF</label>
+                        <div className="relative">
+                            <Field as="select" name="uf" className="form-control">
+                                {estados.map((estado) => (
+                                    <option key={estado.value} value={estado.value}>
+                                        {estado.label}
+                                    </option>
+                                ))}
+                            </Field>
+                            {/* Adiciona uma seta para indicar que é um dropdown */}
+                            <span className="select-arrow"></span>
+                        </div>
+                        <ErrorMessage name="uf" component="div" className="error-message" />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="qtdAlunos">Quantidade de Alunos</label>
+                        <Field type="number" name="qtdAlunos" className="form-control" />
+                        <ErrorMessage name="qtdAlunos" component="div" className="error-message" />
+                    </div>
+                    <button type="submit" className="hidden-submit" disabled={isSubmitting}>Salvar</button>
+                </Form>
+            )}
+        </Formik>
     );
 });
 
+// Definição do displayName do componente
 FormInstituicao.displayName = 'FormInstituicao';
 
-// Validação das propriedades
+// Definição das propTypes do componente
 FormInstituicao.propTypes = {
     onSubmit: PropTypes.func,
     initialData: PropTypes.shape({

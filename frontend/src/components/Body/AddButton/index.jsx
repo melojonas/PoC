@@ -1,41 +1,37 @@
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Modal } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import ReusableModal from '../ReusableModal';
 import FormInstituicao from '../FormInstituicao';
 import axios from '../../../api/axios';
 
 /**
  * Componente AddButton
  * 
- * @component
+ * Este componente renderiza um botão que, ao ser clicado, abre um modal para adicionar uma nova instituição.
+ * 
  * @param {Object} props - Propriedades do componente
  * @param {Function} props.onDataChange - Função chamada quando os dados são alterados
- * @returns {JSX.Element} - Elemento JSX do botão de adicionar
+ * 
+ * @returns {JSX.Element} Elemento JSX que representa o botão de adicionar instituição
  */
 const AddButton = ({ onDataChange }) => {
     const [show, setShow] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const formRef = useRef(null);
 
-    /**
-     * Fecha o modal e limpa a mensagem de erro
-     */
+    // Fecha o modal e reseta a mensagem de erro
     const handleClose = () => { setShow(false); setErrorMessage(''); };
 
-    /**
-     * Abre o modal
-     */
+    // Abre o modal
     const handleShow = () => setShow(true);
 
     /**
-     * Submete os dados do formulário para criar uma nova instituição
+     * Lida com o envio do formulário
      * 
-     * @param {Object} data - Dados da instituição
-     * @param {string} data.nome - Nome da instituição
-     * @param {string} data.uf - Unidade Federativa da instituição
-     * @param {number} data.qtdAlunos - Quantidade de alunos da instituição
+     * @param {Object} data - Dados do formulário
      */
     const handleSubmit = async (data) => {
         try {
@@ -57,27 +53,21 @@ const AddButton = ({ onDataChange }) => {
                 <FontAwesomeIcon icon={faPlus} /> Nova Instituição
             </Button>
 
-            <Modal show={show} onHide={handleClose}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Nova Instituição</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <FormInstituicao ref={formRef} onSubmit={handleSubmit} />
-                </Modal.Body>
-                <Modal.Footer>
-                    {errorMessage && <div className="error-message">{errorMessage}</div>}
-                    <Button variant="secondary" onClick={handleClose}>
-                        Fechar
-                    </Button>
-                    <Button variant="primary" onClick={ () => formRef.current && formRef.current.submit() }>
-                        Salvar
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <ReusableModal
+                show={show}
+                handleClose={handleClose}
+                title="Nova Instituição"
+                errorMessage={errorMessage}
+                formRef={formRef}
+                handleSubmit={handleSubmit}
+            >
+                <FormInstituicao ref={formRef} onSubmit={handleSubmit} />
+            </ReusableModal>
         </div>
     );
 }
 
+// Validação das propriedades
 AddButton.propTypes = {
     onDataChange: PropTypes.func.isRequired,
 };
