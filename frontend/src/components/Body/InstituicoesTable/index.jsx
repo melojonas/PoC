@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useTable } from 'react-table';
-import { Button } from 'react-bootstrap';
+import { useTable, useSortBy, usePagination } from 'react-table';
+import { Button, Form, Pagination } from 'react-bootstrap';
 import axios from '../../../api/axios';
 import FormInstituicao from '../FormInstituicao';
 import './index.css';
@@ -23,14 +23,32 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     const [errorMessage, setErrorMessage] = useState('');
     const formRef = useRef(null); // Referência para submeter o formulário programaticamente
 
+    const [orderBy, setOrderBy] = useState('');
+    const [order, setOrder] = useState('asc');
+    const [filterByNome, setFilterByNome] = useState('');
+    const [filterByUf, setFilterByUf] = useState('');
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
+
     const fetchData = React.useCallback(async () => {
         try {
-            const response = await axios.get('/instituicoes');
+            const response = await axios.get('/instituicoes', {
+                params: {
+                    orderBy,
+                    order,
+                    filterByNome,
+                    filterByUf,
+                    page,
+                    limit: pageSize,
+                },
+            });
             setData(response.data);
+            setTotalPages(Math.ceil(response.data.length / pageSize));
         } catch (error) {
             console.error('Erro ao buscar instituições:', error);
         }
-    }, []);
+    }, [orderBy, order, filterByNome, filterByUf, page, pageSize]);
 
     useEffect(() => {
         fetchData();
@@ -97,17 +115,54 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         headerGroups,
         rows,
         prepareRow,
-    } = useTable({ columns, data });
+        canPreviousPage,
+        canNextPage,
+        pageOptions,
+        pageCount,
+        gotoPage,
+        nextPage,
+        previousPage,
+        state: { pageIndex, pageSize: currentPageSize },
+    } = useTable(
+        { columns, data, initialState: { pageIndex: 0, pageSize: 10 } },
+        useSortBy,
+        usePagination
+    );
 
     return (
         <div className="table-container">
+            <Form>
+                <Form.Group controlId="filterByNome">
+                    <Form.Label>Filtrar por Nome</Form.Label>
+                    <Form.Control
+                        type="text"
+                        value={filterByNome}
+                        onChange={(e) => setFilterByNome(e.target.value)}
+                    />
+                </Form.Group>
+                <Form.Group controlId="filterByUf">
+                    <Form.Label>Filtrar por UF</Form.Label>
+                    <Form.Control
+                        type="text"
+                        value={filterByUf}
+                        onChange={(e) => setFilterByUf(e.target.value)}
+                    />
+                </Form.Group>
+            </Form>
             <table {...getTableProps()} style={{ width: '100%', maxHeight: '400px', overflowY: 'auto' }}>
                 <thead>
                     {headerGroups.map((headerGroup, index) => (
                         <tr {...headerGroup.getHeaderGroupProps()} key={`headerGroup-${index}`}>
                             {headerGroup.headers.map((column, colIndex) => (
-                                <th {...column.getHeaderProps()} key={`column-${colIndex}`}>
+                                <th {...column.getHeaderProps(column.getSortByToggleProps())} key={`column-${colIndex}`}>
                                     {column.render('Header')}
+                                    <span>
+                                        {column.isSorted
+                                            ? column.isSortedDesc
+                                                ? ' 🔽'
+                                                : ' 🔼'
+                                            : ''}
+                                    </span>
                                 </th>
                             ))}
                         </tr>
@@ -128,6 +183,21 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
                     })}
                 </tbody>
             </table>
+            <Pagination>
+                <Pagination.First onClick={() => gotoPage(0)} disabled={!canPreviousPage} />
+                <Pagination.Prev onClick={() => previousPage()} disabled={!canPreviousPage} />
+                {pageOptions.map((page, index) => (
+                    <Pagination.Item
+                        key={index}
+                        active={pageIndex === page}
+                        onClick={() => gotoPage(page)}
+                    >
+                        {page + 1}
+                    </Pagination.Item>
+                ))}
+                <Pagination.Next onClick={() => nextPage()} disabled={!canNextPage} />
+                <Pagination.Last onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage} />
+            </Pagination>
 
             {/* Modal para editar instituição */}
             <ReusableModal

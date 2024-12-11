@@ -1,14 +1,36 @@
-// Rotas para o CRUD de Instituições
 const express = require('express')
 const router = new express.Router()
 const Instituicoes = require('../models/Instituicoes')
 
-// Lista todas as Instituições
+// Lista todas as Instituições com ordenação, filtragem e paginação
 router.get('/', async (req, res) => {
+    const { orderBy, order, filterByNome, filterByUf, page, limit } = req.query;
 
-    const list = await Instituicoes.find({})
-    res.status(200).send(list)
+    const sort = {};
+    if (orderBy) {
+        sort[orderBy] = order === 'desc' ? -1 : 1;
+    }
 
+    const match = {};
+    if (filterByNome) {
+        match.nome = { $regex: filterByNome, $options: 'i' };
+    }
+    if (filterByUf) {
+        match.uf = filterByUf;
+    }
+
+    const options = {
+        sort,
+        skip: (parseInt(page) - 1) * parseInt(limit),
+        limit: parseInt(limit)
+    };
+
+    try {
+        const list = await Instituicoes.find(match, null, options);
+        res.status(200).send(list);
+    } catch (e) {
+        res.status(500).send(e);
+    }
 })
 
 // Cria uma nova Instituição
