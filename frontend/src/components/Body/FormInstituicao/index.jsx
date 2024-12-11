@@ -5,7 +5,6 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import './index.css';
 
-
 /**
  * Este componente renderiza um formulário para dados de instituição usando o Formik para gerenciamento de formulários e o Yup para validação.
  * Ele permite que os usuários insiram o nome da instituição, o estado (UF) e o número de estudantes.
@@ -31,6 +30,9 @@ import './index.css';
 const FormInstituicao = forwardRef(({ onSubmit, initialData }, ref) => {
     // Uso do hook useImperativeHandle para expor a função submit
     useImperativeHandle(ref, () => ({
+        /**
+         * Submete o formulário programaticamente
+         */
         submit: () => {
             document.querySelector('button[type="submit"]').click();
         },
@@ -138,5 +140,4 @@ FormInstituicao.propTypes = {
     }),
 };
 
-// Exportação do componente
 export default FormInstituicao;

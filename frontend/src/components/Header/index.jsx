@@ -1,5 +1,11 @@
 import './index.css';
 
+/**
+ * Componente Header
+ * 
+ * @component
+ * @returns {JSX.Element} - Elemento JSX do cabeçalho
+ */
 const Header = () => {
     return (
         <header>

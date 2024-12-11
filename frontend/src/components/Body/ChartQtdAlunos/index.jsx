@@ -39,7 +39,7 @@ const ChartQtdAlunos = ({ dataChanged }) => {
   );
 };
 
-// Validação de tipos de props
+// Validação das propriedades
 ChartQtdAlunos.propTypes = {
   dataChanged: PropTypes.bool.isRequired,
 };

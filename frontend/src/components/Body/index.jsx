@@ -5,6 +5,12 @@ import ChartQtdAlunos from './ChartQtdAlunos';
 import InstituicoesTable from './InstituicoesTable';
 import './index.css'
 
+/**
+ * Componente Body
+ * 
+ * @component
+ * @returns {JSX.Element} - Elemento JSX do corpo da aplicação
+ */
 const Body = () => {
     const { dataChanged, handleDataChange } = useDataChange();
 

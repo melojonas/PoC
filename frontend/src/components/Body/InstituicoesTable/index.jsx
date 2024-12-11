@@ -37,7 +37,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         } catch (error) {
             console.error('Erro ao buscar instituições:', error);
         }
-    }, []);
+    }, [pageIndex, pageSize]);
 
     useEffect(() => {
         fetchData();
@@ -54,7 +54,14 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         }
     }, [fetchData, onDataChange]);
 
-    // Recebe os dados do formulário e faz a requisição PUT para atualizar a instituição
+    /**
+     * Recebe os dados do formulário e faz a requisição PUT para atualizar a instituição
+     * 
+     * @param {Object} data - Dados da instituição
+     * @param {string} data.nome - Nome da instituição
+     * @param {string} data.uf - Unidade Federativa da instituição
+     * @param {number} data.qtdAlunos - Quantidade de alunos da instituição
+     */
     const handleEdit = async (data) => {
         try {
             await axios.put(`/instituicoes/${currentInstituicao._id}`, data);
@@ -103,6 +110,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
         [handleDelete]
     );
 
+    // Cria a tabela com os dados e as funções de paginação e ordenação
     const {
         getTableProps,
         getTableBodyProps,
@@ -248,7 +256,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
     );
 };
 
-// Definição das propTypes do componente
+// Validação das propriedades
 InstituicoesTable.propTypes = {
     row: PropTypes.shape({
         cells: PropTypes.arrayOf(
