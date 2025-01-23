@@ -8,7 +8,7 @@ const password = encodeURIComponent('j0nasMelo')
 const databaseName = encodeURIComponent('jonas')
 const authDB = databaseName
 
-const connectionURL = `mongodb://${username}:${password}@${mongoURL}:${mongoPort}/${databaseName}?authMechanism=SCRAM-SHA-1&authSource=${authDB}`
+const connectionURL = `mongodb+srv://jonasmelo:WOhLY6P30VzBmAGZ@cluster0.pfrru.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
 /**
  * Conecta ao banco de dados MongoDB usando o Mongoose.

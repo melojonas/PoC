@@ -250,7 +250,7 @@ const InstituicoesTable = ({ onDataChange, dataChanged }) => {
                 formRef={formRef}
                 handleSubmit={handleEdit}
             >
-                <FormInstituicao ref={formRef} initialData={currentInstituicao} />
+                <FormInstituicao ref={formRef} initialData={currentInstituicao} onSubmit={handleEdit}/>
             </ReusableModal>
         </div>
     );
